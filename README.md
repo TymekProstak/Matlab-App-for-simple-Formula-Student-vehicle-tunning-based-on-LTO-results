@@ -58,7 +58,7 @@ The `external/` folder should not be committed to Git.
 Clone the repository:
 
 ```bash
-git clone git@github.com:TymekProstak/Matlab-App-for-simple-Formula-Student-vehicle-tunning-based-on-LTO-results.git
+git clone https://github.com/TymekProstak/Matlab-App-for-simple-Formula-Student-vehicle-tunning-based-on-LTO-results.git
 cd Matlab-App-for-simple-Formula-Student-vehicle-tunning-based-on-LTO-results
 ```
 
