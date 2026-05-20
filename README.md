@@ -28,7 +28,7 @@ Automatic installation:
 install_casadi("auto")
 ```
 
-Forced OS selection:
+Forced operating-system selection:
 
 ```matlab
 install_casadi("windows")
@@ -79,8 +79,8 @@ The app provides a GUI workflow for:
 - preparing a solver-ready track,
 - generating a backward-forward initial guess,
 - solving an NLP with CasADi/IPOPT,
-- plotting solution and initial guess,
-- exporting MAT, CSV folder, config JSON, track CSV and PNG plots.
+- plotting the solution and initial guess,
+- exporting MAT files, CSV folders, config JSON, track CSV and PNG plots.
 
 General workflow:
 
@@ -125,87 +125,47 @@ The current implemented backend is a point-mass NLP in Frenet coordinates.
 
 State vector:
 
-$$
-x =
-\begin{bmatrix}
-e_y \\
-e_\psi \\
-v_x \\
-M_{\mathrm{cmd}} \\
-M_{\mathrm{rear}} \\
-t
-\end{bmatrix}
-$$
+$$x=\begin{bmatrix}e_y & e_\psi & v_x & M_{\mathrm{cmd}} & M_{\mathrm{rear}} & t\end{bmatrix}^{T}$$
 
 Control vector:
 
-$$
-u =
-\begin{bmatrix}
-\dot{M}_{\mathrm{cmd}} \\
-\kappa_{\mathrm{vehicle}}
-\end{bmatrix}
-$$
+$$u=\begin{bmatrix}\dot{M}_{\mathrm{cmd}} & \kappa_{\mathrm{vehicle}}\end{bmatrix}^{T}$$
 
 Here, $\kappa_{\mathrm{vehicle}}$ is a pseudo-curvature decision variable, not a real steering angle.
 
 Progress speed:
 
-$$
-v_s = \frac{v_x \cos(e_\psi)}{1-\kappa_{\mathrm{ref}}e_y}
-$$
+$$v_s=\frac{v_x\cos(e_\psi)}{1-\kappa_{\mathrm{ref}}e_y}$$
 
 Frenet singularity protection:
 
-$$
-1-\kappa_{\mathrm{ref}}e_y \ge 0.2
-$$
+$$1-\kappa_{\mathrm{ref}}e_y\geq0.2$$
 
 Rear longitudinal force:
 
-$$
-F_x = \frac{M_{\mathrm{rear}}}{R}
-$$
+$$F_x=\frac{M_{\mathrm{rear}}}{R}$$
 
 Longitudinal acceleration:
 
-$$
-a_x = \frac{F_x - F_{\mathrm{drag}} - F_{\mathrm{rr}}}{m}
-$$
+$$a_x=\frac{F_x-F_{\mathrm{drag}}-F_{\mathrm{rr}}}{m}$$
 
-Aerodynamic drag:
+Aerodynamic drag and rolling resistance:
 
-$$
-F_{\mathrm{drag}} = C_d v_x^2
-$$
+$$F_{\mathrm{drag}}=C_dv_x^2$$
 
-Rolling resistance:
-
-$$
-F_{\mathrm{rr}} = C_rmg
-$$
+$$F_{\mathrm{rr}}=C_rmg$$
 
 Drivetrain first-order model:
 
-$$
-\dot{M}_{\mathrm{rear}} =
-\frac{M_{\mathrm{cmd}}-M_{\mathrm{rear}}}{\tau}
-$$
+$$\dot{M}_{\mathrm{rear}}=\frac{M_{\mathrm{cmd}}-M_{\mathrm{rear}}}{\tau}$$
 
 Lateral acceleration approximation:
 
-$$
-a_y = v_x^2\kappa_{\mathrm{vehicle}}
-$$
+$$a_y=v_x^2\kappa_{\mathrm{vehicle}}$$
 
 Tire friction ellipse:
 
-$$
-\left(\frac{F_{x,i}}{\mu_{x,i}F_{z,i}}\right)^2
-+
-\left(\frac{F_{y,i}}{\mu_{y,i}F_{z,i}}\right)^2
-\le 1
-$$
+$$\left(\frac{F_{x,i}}{\mu_{x,i}F_{z,i}}\right)^2+\left(\frac{F_{y,i}}{\mu_{y,i}F_{z,i}}\right)^2\leq1$$
 
 Current normal load model:
 
@@ -217,17 +177,19 @@ No dynamic mass transfer is included in the current point-mass backend.
 
 Objective function:
 
-$$
-J =
-t_N
-+
-q_{\dot M}\sum_k \dot M_{\mathrm{cmd},k}^2
-+
-q_\kappa\sum_k
-(\kappa_{\mathrm{vehicle},k+1}-\kappa_{\mathrm{vehicle},k})^2
--
-q_v\sum_k v_{s,k}\frac{\Delta s_k}{L_{\mathrm{track}}}
-$$
+$$J=t_N+J_{\dot{M}}+J_{\kappa}-J_v$$
+
+Torque-rate penalty:
+
+$$J_{\dot{M}}=q_{\dot{M}}\sum_k\dot{M}_{\mathrm{cmd},k}^{2}$$
+
+Pseudo-curvature smoothness penalty:
+
+$$J_{\kappa}=q_{\kappa}\sum_k\left(\kappa_{\mathrm{vehicle},k+1}-\kappa_{\mathrm{vehicle},k}\right)^2$$
+
+Progress-speed reward:
+
+$$J_v=q_v\sum_k v_{s,k}\frac{\Delta s_k}{L_{\mathrm{track}}}$$
 
 ---
 
@@ -239,16 +201,11 @@ It estimates a speed profile from curvature and friction limits.
 
 Basic relation:
 
-$$
-a_y = v_x^2\kappa
-$$
+$$a_y=v_x^2\kappa$$
 
 Therefore:
 
-$$
-v_{x,\max} =
-\sqrt{\frac{a_{y,\max}}{|\kappa|}}
-$$
+$$v_{x,\max}=\sqrt{\frac{a_{y,\max}}{|\kappa|}}$$
 
 Then the algorithm applies forward acceleration and backward braking passes.
 
@@ -272,30 +229,15 @@ Assumptions:
 
 Typical equations:
 
-$$
-\dot v_y =
-\frac{F_{yf}+F_{yr}}{m}
--
-v_x r
-$$
+$$\dot{v}_y=\frac{F_{yf}+F_{yr}}{m}-v_xr$$
 
-$$
-\dot r =
-\frac{l_fF_{yf}-l_rF_{yr}}{I_z}
-$$
+$$\dot{r}=\frac{l_fF_{yf}-l_rF_{yr}}{I_z}$$
 
 Slip angles:
 
-$$
-\alpha_f =
-\delta -
-\arctan\left(\frac{v_y+l_fr}{v_x}\right)
-$$
+$$\alpha_f=\delta-\arctan\left(\frac{v_y+l_fr}{v_x}\right)$$
 
-$$
-\alpha_r =
--\arctan\left(\frac{v_y-l_rr}{v_x}\right)
-$$
+$$\alpha_r=-\arctan\left(\frac{v_y-l_rr}{v_x}\right)$$
 
 ---
 
@@ -303,7 +245,7 @@ $$
 
 Planned as a model with immediate load transfer.
 
-Assumption:
+Main assumption:
 
 ```text
 all load transfer is instantaneous / quasi-static / geometric
@@ -311,34 +253,15 @@ all load transfer is instantaneous / quasi-static / geometric
 
 Longitudinal load transfer:
 
-$$
-\Delta F_{z,\mathrm{long}}
-=
-\frac{ma_xh_{\mathrm{CG}}}{L}
-$$
+$$\Delta F_{z,\mathrm{long}}=\frac{ma_xh_{\mathrm{CG}}}{L}$$
 
 Roll stiffness distribution:
 
-$$
-K_{\phi,F}
-=
-\frac{k_{w,F}t_f^2}{2}
-+
-K_{\mathrm{ARB},F}
-$$
+$$K_{\phi,F}=\frac{k_{w,F}t_f^2}{2}+K_{\mathrm{ARB},F}$$
 
-$$
-K_{\phi,R}
-=
-\frac{k_{w,R}t_r^2}{2}
-+
-K_{\mathrm{ARB},R}
-$$
+$$K_{\phi,R}=\frac{k_{w,R}t_r^2}{2}+K_{\mathrm{ARB},R}$$
 
-$$
-\lambda_\phi =
-\frac{K_{\phi,F}}{K_{\phi,F}+K_{\phi,R}}
-$$
+$$\lambda_\phi=\frac{K_{\phi,F}}{K_{\phi,F}+K_{\phi,R}}$$
 
 ---
 
@@ -346,7 +269,7 @@ $$
 
 Planned as the most advanced model.
 
-Assumption:
+Main assumption:
 
 ```text
 total load transfer = geometric/direct part + elastic delayed part
@@ -355,53 +278,21 @@ total load transfer = geometric/direct part + elastic delayed part
 The geometric part acts immediately.  
 The elastic part is delayed with first-order dynamics:
 
-$$
-\dot{\Delta F}_{z,\mathrm{elastic}}
-=
-\frac{
-\Delta F_{z,\mathrm{elastic,target}}
--
-\Delta F_{z,\mathrm{elastic}}
-}
-{\tau}
-$$
+$$\dot{\Delta F}_{z,\mathrm{elastic}}=\frac{\Delta F_{z,\mathrm{elastic,target}}-\Delta F_{z,\mathrm{elastic}}}{\tau}$$
 
-The natural frequency is estimated from wheel rate and sprung mass:
+Natural frequency from wheel rate and sprung mass:
 
-$$
-f_n =
-\frac{1}{2\pi}
-\sqrt{\frac{k_w}{m_s}}
-$$
+$$f_n=\frac{1}{2\pi}\sqrt{\frac{k_w}{m_s}}$$
 
-The first-order time constant is estimated from frequency and damping ratio:
+First-order time constant from frequency and damping ratio:
 
-$$
-\tau =
-\frac{1}{2\pi \zeta f_n}
-$$
+$$\tau=\frac{1}{2\pi\zeta f_n}$$
 
-In the future, this first-order elastic transfer may be replaced by second-order roll/pitch dynamics:
+Future version may replace this first-order elastic transfer with second-order roll/pitch dynamics:
 
-$$
-I_\phi\ddot{\phi}
-+
-C_\phi\dot{\phi}
-+
-K_\phi\phi
-=
-M_\phi
-$$
+$$I_\phi\ddot{\phi}+C_\phi\dot{\phi}+K_\phi\phi=M_\phi$$
 
-$$
-I_\theta\ddot{\theta}
-+
-C_\theta\dot{\theta}
-+
-K_\theta\theta
-=
-M_\theta
-$$
+$$I_\theta\ddot{\theta}+C_\theta\dot{\theta}+K_\theta\theta=M_\theta$$
 
 ---
 
