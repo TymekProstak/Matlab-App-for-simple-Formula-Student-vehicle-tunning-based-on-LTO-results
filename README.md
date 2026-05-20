@@ -531,6 +531,8 @@ Planned future extensions:
 - add accumulator energy as state / decision variable,
 - replace first-order elastic load transfer with second-order roll/pitch elastic transfer,
 - improve solver diagnostics and sanity checks.
+- add camber related effects
+- add tire relaxation effects
 
 ---
 
