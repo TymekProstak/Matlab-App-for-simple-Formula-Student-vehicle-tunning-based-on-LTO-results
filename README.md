@@ -2,7 +2,7 @@
 
 MATLAB App Designer project for simple Formula Student vehicle tuning based on LTO / minimum-lap-time optimization.
 
-The app is built around a GUI workflow for loading a track, editing vehicle/solver parameters, generating an initial guess, solving an NLP with **CasADi + IPOPT**, plotting results, and exporting solution/config/plots.
+The app provides a GUI workflow for loading a track, editing vehicle and solver parameters, generating an initial guess, solving an NLP with **CasADi + IPOPT**, plotting results, and exporting solution/config/plots.
 
 Current working backend:
 
@@ -152,9 +152,7 @@ Here, $\kappa_{\mathrm{vehicle}}$ is a pseudo-curvature decision variable, not a
 Progress speed:
 
 $$
-v_s =
-\frac{v_x \cos(e_\psi)}
-{1-\kappa_{\mathrm{ref}}e_y}
+v_s = \frac{v_x \cos(e_\psi)}{1-\kappa_{\mathrm{ref}}e_y}
 $$
 
 Frenet singularity protection:
@@ -166,22 +164,22 @@ $$
 Rear longitudinal force:
 
 $$
-F_x =
-\frac{M_{\mathrm{rear}}}{R}
+F_x = \frac{M_{\mathrm{rear}}}{R}
 $$
 
 Longitudinal acceleration:
 
 $$
-a_x =
-\frac{F_x - F_{\mathrm{drag}} - F_{\mathrm{rr}}}{m}
+a_x = \frac{F_x - F_{\mathrm{drag}} - F_{\mathrm{rr}}}{m}
 $$
 
-with:
+Aerodynamic drag:
 
 $$
 F_{\mathrm{drag}} = C_d v_x^2
 $$
+
+Rolling resistance:
 
 $$
 F_{\mathrm{rr}} = C_rmg
@@ -203,13 +201,9 @@ $$
 Tire friction ellipse:
 
 $$
-\left(
-\frac{F_{x,i}}{\mu_{x,i}F_{z,i}}
-\right)^2
+\left(\frac{F_{x,i}}{\mu_{x,i}F_{z,i}}\right)^2
 +
-\left(
-\frac{F_{y,i}}{\mu_{y,i}F_{z,i}}
-\right)^2
+\left(\frac{F_{y,i}}{\mu_{y,i}F_{z,i}}\right)^2
 \le 1
 $$
 
@@ -230,11 +224,7 @@ t_N
 q_{\dot M}\sum_k \dot M_{\mathrm{cmd},k}^2
 +
 q_\kappa\sum_k
-\left(
-\kappa_{\mathrm{vehicle},k+1}
--
-\kappa_{\mathrm{vehicle},k}
-\right)^2
+(\kappa_{\mathrm{vehicle},k+1}-\kappa_{\mathrm{vehicle},k})^2
 -
 q_v\sum_k v_{s,k}\frac{\Delta s_k}{L_{\mathrm{track}}}
 $$
@@ -253,14 +243,11 @@ $$
 a_y = v_x^2\kappa
 $$
 
-so:
+Therefore:
 
 $$
-v_{x,\max}
-=
-\sqrt{
-\frac{a_{y,\max}}{|\kappa|}
-}
+v_{x,\max} =
+\sqrt{\frac{a_{y,\max}}{|\kappa|}}
 $$
 
 Then the algorithm applies forward acceleration and backward braking passes.
@@ -302,19 +289,12 @@ Slip angles:
 $$
 \alpha_f =
 \delta -
-\arctan
-\left(
-\frac{v_y+l_fr}{v_x}
-\right)
+\arctan\left(\frac{v_y+l_fr}{v_x}\right)
 $$
 
 $$
 \alpha_r =
--
-\arctan
-\left(
-\frac{v_y-l_rr}{v_x}
-\right)
+-\arctan\left(\frac{v_y-l_rr}{v_x}\right)
 $$
 
 ---
@@ -357,8 +337,7 @@ $$
 
 $$
 \lambda_\phi =
-\frac{K_{\phi,F}}
-{K_{\phi,F}+K_{\phi,R}}
+\frac{K_{\phi,F}}{K_{\phi,F}+K_{\phi,R}}
 $$
 
 ---
@@ -392,9 +371,7 @@ The natural frequency is estimated from wheel rate and sprung mass:
 $$
 f_n =
 \frac{1}{2\pi}
-\sqrt{
-\frac{k_w}{m_s}
-}
+\sqrt{\frac{k_w}{m_s}}
 $$
 
 The first-order time constant is estimated from frequency and damping ratio:
