@@ -80,47 +80,81 @@ x_right_m, y_right_m
 5. Current model: point-mass free-line NLP
 The current implemented backend is a point-mass NLP in Frenet coordinates.
 State vector:
-$$x=\begin{bmatrix}e_y & e_\psi & v_x & M_{\mathrm{cmd}} & M_{\mathrm{rear}} & t\end{bmatrix}^{T}$$
+$$
+x=\begin{bmatrix}e_y & e_\psi & v_x & M_{\mathrm{cmd}} & M_{\mathrm{rear}} & t\end{bmatrix}^{T}
+$$
 Control vector:
-$$u=\begin{bmatrix}\dot{M}{\mathrm{cmd}} & \kappa{\mathrm{vehicle}}\end{bmatrix}^{T}$$
+$$
+u=\begin{bmatrix}\dot{M}{\mathrm{cmd}} & \kappa{\mathrm{vehicle}}\end{bmatrix}^{T}
+$$
 Here, $\kappa_{\mathrm{vehicle}}$ is a pseudo-curvature decision variable, not a real steering angle.
 Progress speed:
-$$v_s=\frac{v_x\cos(e_\psi)}{1-\kappa_{\mathrm{ref}}e_y}$$
+$$
+v_s=\frac{v_x\cos(e_\psi)}{1-\kappa_{\mathrm{ref}}e_y}
+$$
 Frenet singularity protection:
-$$1-\kappa_{\mathrm{ref}}e_y\geq0.2$$
+$$
+1-\kappa_{\mathrm{ref}}e_y\geq0.2
+$$
 Rear longitudinal force:
-$$F_x=\frac{M_{\mathrm{rear}}}{R}$$
+$$
+F_x=\frac{M_{\mathrm{rear}}}{R}
+$$
 Longitudinal acceleration:
-$$a_x=\frac{F_x-F_{\mathrm{drag}}-F_{\mathrm{rr}}}{m}$$
+$$
+a_x=\frac{F_x-F_{\mathrm{drag}}-F_{\mathrm{rr}}}{m}
+$$
 Aerodynamic drag and rolling resistance:
-$$F_{\mathrm{drag}}=C_dv_x^2$$
-$$F_{\mathrm{rr}}=C_rmg$$
+$$
+F_{\mathrm{drag}}=C_dv_x^2
+$$
+$$
+F_{\mathrm{rr}}=C_rmg
+$$
 Drivetrain first-order model:
-$$\dot{M}{\mathrm{rear}}=\frac{M{\mathrm{cmd}}-M_{\mathrm{rear}}}{\tau}$$
+$$
+\dot{M}{\mathrm{rear}}=\frac{M{\mathrm{cmd}}-M_{\mathrm{rear}}}{\tau}
+$$
 Lateral acceleration approximation:
-$$a_y=v_x^2\kappa_{\mathrm{vehicle}}$$
+$$
+a_y=v_x^2\kappa_{\mathrm{vehicle}}
+$$
 Tire friction ellipse:
-$$\left(\frac{F_{x,i}}{\mu_{x,i}F_{z,i}}\right)^2+\left(\frac{F_{y,i}}{\mu_{y,i}F_{z,i}}\right)^2\leq1$$
+$$
+\left(\frac{F_{x,i}}{\mu_{x,i}F_{z,i}}\right)^2+\left(\frac{F_{y,i}}{\mu_{y,i}F_{z,i}}\right)^2\leq1
+$$
 Current normal load model:
 ```text
 static load distribution + aerodynamic downforce
 ```
 No dynamic mass transfer is included in the current point-mass backend.
 Objective function:
-$$J=t_N+J_{\dot{M}}+J_{\kappa}-J_v$$
+$$
+J=t_N+J_{\dot{M}}+J_{\kappa}-J_v
+$$
 Torque-rate penalty:
-$$J_{\dot{M}}=q_{\dot{M}}\sum_k\dot{M}_{\mathrm{cmd},k}^{2}$$
+$$
+J_{\dot{M}}=q_{\dot{M}}\sum_k\dot{M}_{\mathrm{cmd},k}^{2}
+$$
 Pseudo-curvature smoothness penalty:
-$$J_{\kappa}=q_{\kappa}\sum_k\left(\kappa_{\mathrm{vehicle},k+1}-\kappa_{\mathrm{vehicle},k}\right)^2$$
+$$
+J_{\kappa}=q_{\kappa}\sum_k\left(\kappa_{\mathrm{vehicle},k+1}-\kappa_{\mathrm{vehicle},k}\right)^2
+$$
 Progress-speed reward:
-$$J_v=q_v\sum_k v_{s,k}\frac{\Delta s_k}{L_{\mathrm{track}}}$$
+$$
+J_v=q_v\sum_k v_{s,k}\frac{\Delta s_k}{L_{\mathrm{track}}}
+$$
 ---
 6. Current model: dynamic bicycle NLP
 The dynamic bicycle backend is a dynamic lateral vehicle model in Frenet coordinates.
 State vector:
-$$x=\begin{bmatrix}e_y & e_\psi & v_x & v_y & r & M_{\mathrm{cmd}} & M_{\mathrm{rear}} & \delta_{\mathrm{cmd}} & \delta & \dot{\delta} & t\end{bmatrix}^{T}$$
+$$
+x=\begin{bmatrix}e_y & e_\psi & v_x & v_y & r & M_{\mathrm{cmd}} & M_{\mathrm{rear}} & \delta_{\mathrm{cmd}} & \delta & \dot{\delta} & t\end{bmatrix}^{T}
+$$
 Control vector:
-$$u=\begin{bmatrix}\dot{M}{\mathrm{cmd}} & \dot{\delta}{\mathrm{cmd}}\end{bmatrix}^{T}$$
+$$
+u=\begin{bmatrix}\dot{M}{\mathrm{cmd}} & \dot{\delta}{\mathrm{cmd}}\end{bmatrix}^{T}
+$$
 The model includes:
 lateral velocity,
 yaw rate,
@@ -132,21 +166,39 @@ static normal loads with aerodynamic downforce,
 axle-level tire friction ellipse,
 no dynamic mass transfer.
 Progress speed:
-$$v_s=\frac{v_x\cos(e_\psi)-v_y\sin(e_\psi)}{1-\kappa_{\mathrm{ref}}e_y}$$
+$$
+v_s=\frac{v_x\cos(e_\psi)-v_y\sin(e_\psi)}{1-\kappa_{\mathrm{ref}}e_y}
+$$
 Frenet singularity protection:
-$$1-\kappa_{\mathrm{ref}}e_y\geq0.2$$
+$$
+1-\kappa_{\mathrm{ref}}e_y\geq0.2
+$$
 Rear longitudinal force:
-$$F_{x,R}=\frac{M_{\mathrm{rear}}}{R}$$
+$$
+F_{x,R}=\frac{M_{\mathrm{rear}}}{R}
+$$
 Dynamic bicycle equations:
-$$\dot{v}x=\frac{F{x,R}-F_{yf}\sin(\delta)-F_{\mathrm{drag}}-F_{\mathrm{rr}}}{m}+v_y r$$
-$$\dot{v}y=\frac{F{yf}\cos(\delta)+F_{yr}}{m}-v_x r$$
-$$\dot{r}=\frac{l_fF_{yf}\cos(\delta)-l_rF_{yr}}{I_z}$$
+$$
+\dot{v}x=\frac{F{x,R}-F_{yf}\sin(\delta)-F_{\mathrm{drag}}-F_{\mathrm{rr}}}{m}+v_yr
+$$
+$$
+\dot{v}y=\frac{F{yf}\cos(\delta)+F_{yr}}{m}-v_xr
+$$
+$$
+\dot{r}=\frac{l_fF_{yf}\cos(\delta)-l_rF_{yr}}{I_z}
+$$
 Slip angles:
-$$\alpha_f=\delta-\arctan\left(\frac{v_y+l_fr}{v_x}\right)$$
-$$\alpha_r=-\arctan\left(\frac{v_y-l_rr}{v_x}\right)$$
+$$
+\alpha_f=\delta-\arctan\left(\frac{v_y+l_fr}{v_x}\right)
+$$
+$$
+\alpha_r=-\arctan\left(\frac{v_y-l_rr}{v_x}\right)
+$$
 The lateral tire force is computed from an MF5.2-like tire model.
 Axle-level tire friction ellipse:
-$$\left(\frac{F_{x,A}}{\mu_{x,A}F_{z,A}}\right)^2+\left(\frac{F_{y,A}}{\mu_{y,A}F_{z,A}}\right)^2\leq1$$
+$$
+\left(\frac{F_{x,A}}{\mu_{x,A}F_{z,A}}\right)^2+\left(\frac{F_{y,A}}{\mu_{y,A}F_{z,A}}\right)^2\leq1
+$$
 where $A$ is the front or rear axle.
 Current normal load model:
 ```text
@@ -154,32 +206,56 @@ static load distribution + aerodynamic downforce
 ```
 No dynamic mass transfer is included in the current dynamic bicycle backend.
 Drivetrain first-order model:
-$$\dot{M}{\mathrm{rear}}=\frac{M{\mathrm{cmd}}-M_{\mathrm{rear}}}{\tau}$$
+$$
+\dot{M}{\mathrm{rear}}=\frac{M{\mathrm{cmd}}-M_{\mathrm{rear}}}{\tau}
+$$
 Steering actuator model:
-$$\dot{\delta}{\mathrm{cmd}}=\dot{\delta}{\mathrm{cmd}}$$
-$$\dot{\delta}=\dot{\delta}$$
-$$\ddot{\delta}=\omega_n^2(\delta_{\mathrm{cmd}}-\delta)-2\zeta\omega_n\dot{\delta}$$
+$$
+\dot{\delta}{\mathrm{cmd}}=u\delta
+$$
+$$
+\dot{\delta}=\dot{\delta}
+$$
+$$
+\ddot{\delta}=\omega_n^2(\delta_{\mathrm{cmd}}-\delta)-2\zeta\omega_n\dot{\delta}
+$$
 Objective function:
-$$J=t_N+J_{\dot{M}}+J_{\dot{\delta}}+J_{\beta}$$
+$$
+J=t_N+J_{\dot{M}}+J_{\dot{\delta}}+J_{\beta}
+$$
 Torque-rate penalty:
-$$J_{\dot{M}}=q_{\dot{M}}\sum_k\dot{M}_{\mathrm{cmd},k}^{2}$$
+$$
+J_{\dot{M}}=q_{\dot{M}}\sum_k\dot{M}_{\mathrm{cmd},k}^{2}
+$$
 Steering command-rate penalty:
-$$J_{\dot{\delta}}=q_{\dot{\delta}}\sum_k\dot{\delta}_{\mathrm{cmd},k}^{2}$$
+$$
+J_{\dot{\delta}}=q_{\dot{\delta}}\sum_k\dot{\delta}_{\mathrm{cmd},k}^{2}
+$$
 Beta consistency penalty:
-$$J_{\beta}=q_{\beta}\sum_k(\beta_{\mathrm{dyn},k}-\beta_{\mathrm{kin},k})^2\Delta s_k$$
+$$
+J_{\beta}=q_{\beta}\sum_k(\beta_{\mathrm{dyn},k}-\beta_{\mathrm{kin},k})^2\Delta s_k
+$$
 Dynamic beta:
-$$\beta_{\mathrm{dyn}}=\arctan\left(\frac{v_y}{v_x}\right)$$
+$$
+\beta_{\mathrm{dyn}}=\arctan\left(\frac{v_y}{v_x}\right)
+$$
 Kinematic beta:
-$$\beta_{\mathrm{kin}}=\arctan\left(\frac{l_r}{L}\tan(\delta)\right)$$
+$$
+\beta_{\mathrm{kin}}=\arctan\left(\frac{l_r}{L}\tan(\delta)\right)
+$$
 The beta cost does not directly penalize beta. It penalizes the difference between dynamic beta and kinematic beta.
 ---
 7. Backward-forward initial guess
 The backward-forward solver is a fast initial-guess generator.
 It estimates a speed profile from curvature and friction limits.
 Basic relation:
-$$a_y=v_x^2\kappa$$
+$$
+a_y=v_x^2\kappa
+$$
 Therefore:
-$$v_{x,\max}=\sqrt{\frac{a_{y,\max}}{|\kappa|}}$$
+$$
+v_{x,\max}=\sqrt{\frac{a_{y,\max}}{|\kappa|}}
+$$
 Then the algorithm applies forward acceleration and backward braking passes.
 It is not the final optimizer. It only generates a useful seed for the NLP.
 ---
@@ -191,11 +267,19 @@ Main assumption:
 all load transfer is instantaneous / quasi-static / geometric
 ```
 Longitudinal load transfer:
-$$\Delta F_{z,\mathrm{long}}=\frac{ma_xh_{\mathrm{CG}}}{L}$$
+$$
+\Delta F_{z,\mathrm{long}}=\frac{ma_xh_{\mathrm{CG}}}{L}
+$$
 Roll stiffness distribution:
-$$K_{\phi,F}=\frac{k_{w,F}t_f^2}{2}+K_{\mathrm{ARB},F}$$
-$$K_{\phi,R}=\frac{k_{w,R}t_r^2}{2}+K_{\mathrm{ARB},R}$$
-$$\lambda_\phi=\frac{K_{\phi,F}}{K_{\phi,F}+K_{\phi,R}}$$
+$$
+K_{\phi,F}=\frac{k_{w,F}t_f^2}{2}+K_{\mathrm{ARB},F}
+$$
+$$
+K_{\phi,R}=\frac{k_{w,R}t_r^2}{2}+K_{\mathrm{ARB},R}
+$$
+$$
+\lambda_\phi=\frac{K_{\phi,F}}{K_{\phi,F}+K_{\phi,R}}
+$$
 ---
 8.2 Dynamic suspension model
 Planned as the most advanced model.
@@ -205,14 +289,24 @@ total load transfer = geometric/direct part + elastic delayed part
 ```
 The geometric part acts immediately.  
 The elastic part is delayed with first-order dynamics:
-$$\dot{\Delta F}{z,\mathrm{elastic}}=\frac{\Delta F{z,\mathrm{elastic,target}}-\Delta F_{z,\mathrm{elastic}}}{\tau}$$
+$$
+\dot{\Delta F}{z,\mathrm{elastic}}=\frac{\Delta F{z,\mathrm{elastic,target}}-\Delta F_{z,\mathrm{elastic}}}{\tau}
+$$
 Natural frequency from wheel rate and sprung mass:
-$$f_n=\frac{1}{2\pi}\sqrt{\frac{k_w}{m_s}}$$
+$$
+f_n=\frac{1}{2\pi}\sqrt{\frac{k_w}{m_s}}
+$$
 First-order time constant from frequency and damping ratio:
-$$\tau=\frac{1}{2\pi\zeta f_n}$$
+$$
+\tau=\frac{1}{2\pi\zeta f_n}
+$$
 Future version may replace this first-order elastic transfer with second-order roll/pitch dynamics:
-$$I_\phi\ddot{\phi}+C_\phi\dot{\phi}+K_\phi\phi=M_\phi$$
-$$I_\theta\ddot{\theta}+C_\theta\dot{\theta}+K_\theta\theta=M_\theta$$
+$$
+I_\phi\ddot{\phi}+C_\phi\dot{\phi}+K_\phi\phi=M_\phi
+$$
+$$
+I_\theta\ddot{\theta}+C_\theta\dot{\theta}+K_\theta\theta=M_\theta
+$$
 ---
 9. GUI overview
 Main panels:
