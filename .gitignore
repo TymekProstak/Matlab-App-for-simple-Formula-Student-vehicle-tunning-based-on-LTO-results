@@ -1,0 +1,53 @@
+# ============================================================
+# LTO MATLAB App - ignored generated/local folders
+# ============================================================
+
+# Exported results / output packages
+results/
+Results/
+output/
+outputs/
+Output/
+Outputs/
+
+# External dependencies, e.g. CasADi
+external/
+External/
+
+# ============================================================
+# MATLAB generated / temporary files
+# ============================================================
+
+*.asv
+*.m~
+*.autosave
+*.tmp
+*.bak
+
+# MATLAB compiled / binary cache artifacts
+*.mex*
+*.slxc
+*.p
+
+# MATLAB/Simulink project backup files
+*.prj.bak
+*.mlapp.bak
+
+# ============================================================
+# Local logs / temporary debug files
+# ============================================================
+
+logs/
+Logs/
+*.log
+
+# ============================================================
+# OS/editor junk
+# ============================================================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.vscode/
+.idea/
