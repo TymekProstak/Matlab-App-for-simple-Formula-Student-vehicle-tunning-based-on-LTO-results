@@ -141,8 +141,13 @@ function solution = runPointMassSolver(solverTrack, cfg, initialGuess)
         opti.subject_to(power >= -1000.0 * cfg.drivetrain.max_brake_power_kW);
 
         % Avoid Frenet singularity.
+        % If kappaRef(k) == 0, then denom = 1 is constant and the constraint
+        % is automatically satisfied. CasADi cannot accept constant subject_to().
         denom = 1.0 - kappaRef(k) * ey;
-        opti.subject_to(denom >= 0.2);
+        
+        if abs(kappaRef(k)) > 1e-12
+            opti.subject_to(denom >= 0.2);
+        end
 
         % Keep heading error reasonable. This is geometric, not steering-related.
         opti.subject_to(epsi >= -cfg.bounds.beta_max_rad);

@@ -93,7 +93,7 @@
     "max_drive_torque": 460.0,
     "max_brake_torque": 460.0,
     "max_drive_power_kW": 80.0,
-    "max_brake_power_kW": 30.0,
+    "max_brake_power_kW": 80.0,
     "first_order_time_constant": 0.05
   },
 

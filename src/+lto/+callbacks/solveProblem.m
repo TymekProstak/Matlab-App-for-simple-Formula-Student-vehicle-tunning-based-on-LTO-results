@@ -5,15 +5,16 @@ function solveProblem(app)
         lto.ui.setStatus(app, "Solving", "loading");
         lto.ui.appendLog(app, "Solve started.", "INFO");
 
-        % Top bar is treated as the source of truth before Solve.
+        % Top bar is treated as source of truth.
         lto.callbacks.syncModelFromTopBar(app);
         lto.callbacks.syncSolveLevelFromTopBar(app);
 
         cfg = lto.config.readConfigFromApp(app);
         app.Config = cfg;
+
         lto.ui.appendLog(app, ...
-        "Periodic track flag: " + string(logical(cfg.solver.periodic_track)), ...
-        "INFO");
+            "Periodic track flag: " + string(logical(cfg.solver.periodic_track)), ...
+            "INFO");
 
         lto.ui.appendLog(app, ...
             "Backend model: " + string(cfg.solver.lto_mode) + ...
@@ -22,20 +23,15 @@ function solveProblem(app)
             "INFO");
 
         if ~hasLoadedTrack(app)
-            lto.ui.appendLog(app, "Track not loaded. Loading track from field path.", "INFO");
+            lto.ui.appendLog(app, ...
+                "Track not loaded. Loading track from field path.", ...
+                "INFO");
             lto.callbacks.loadTrackFromField(app);
         end
 
         if ~hasLoadedTrack(app)
             error("LTO:Solve:NoTrack", ...
                   "No valid track is loaded.");
-        end
-
-        backendModel = string(cfg.solver.lto_mode);
-
-        if backendModel ~= "Point mass"
-            error("LTO:Solve:BackendNotImplemented", ...
-                  "Backend model not implemented yet: %s", backendModel);
         end
 
         lto.ui.appendLog(app, "Preparing solver track...", "INFO");
@@ -51,14 +47,16 @@ function solveProblem(app)
             ", length = " + string(solverTrack.length) + " m.", ...
             "INFO");
 
-        initialGuess = choosePointMassInitialGuess(app, cfg, solverTrack);
+        [initialGuess, backendToRun] = prepareInitialGuessForBackend(app, cfg, solverTrack);
 
         lto.ui.setStatus(app, "Running IPOPT", "loading");
-        lto.ui.appendLog(app, "Point mass IPOPT solve started.", "INFO");
+        lto.ui.appendLog(app, backendToRun + " IPOPT solve started.", "INFO");
+        drawnow;
 
         solveTimer = tic;
 
-        solution = lto.solver.runPointMassSolver( ...
+        solution = runSelectedBackendSolver( ...
+            backendToRun, ...
             solverTrack, ...
             cfg, ...
             initialGuess ...
@@ -67,17 +65,12 @@ function solveProblem(app)
         solveTime = toc(solveTimer);
 
         lto.ui.appendLog(app, ...
-            "Point mass IPOPT solve finished in " + string(solveTime) + " s.", ...
+            backendToRun + " IPOPT solve finished in " + string(solveTime) + " s.", ...
             "INFO");
 
         solution.solve_time_s = solveTime;
 
         app.LastSolution = solution;
-
-        % % The last NLP result is also a valid solution-like seed for later runs.
-        % if isfield(solution, "X") && isfield(solution, "U")
-        %     app.InitialGuess = solution;
-        % end
 
         updateSolveSummaryTable(app, solution, solveTime);
 
@@ -87,12 +80,10 @@ function solveProblem(app)
             lto.ui.setStatus(app, "Solve finished with warning", "warning");
         end
 
-        lto.ui.appendLog( ...
-            app, ...
+        lto.ui.appendLog(app, ...
             "Solve finished. Status: " + string(solution.status) + ...
             ", lap time: " + string(solution.lap_time) + " s.", ...
-            "INFO" ...
-        );
+            "INFO");
 
     catch ME
         lto.ui.setStatus(app, "Solve failed", "error");
@@ -103,88 +94,165 @@ function solveProblem(app)
 end
 
 
-function initialGuess = choosePointMassInitialGuess(app, cfg, solverTrack)
-%CHOOSEPOINTMASSINITIALGUESS Choose initial guess for Point mass NLP.
+function [initialGuess, backendToRun] = prepareInitialGuessForBackend(app, cfg, solverTrack)
+%PREPAREINITIALGUESSFORBACKEND Prepare initial guess and staged pipeline.
 
+    backendToRun = string(cfg.solver.lto_mode);
     strategy = string(cfg.solver.initial_guess_strategy);
+
+    backendNorm = normalizeText(backendToRun);
+    strategyNorm = normalizeText(strategy);
+
     initialGuess = [];
 
-    strategyNorm = lower(strategy);
-    strategyNorm = erase(strategyNorm, " ");
-    strategyNorm = erase(strategyNorm, "-");
-    strategyNorm = erase(strategyNorm, "_");
+    % ============================================================
+    % Direct solve
+    % ============================================================
 
     if strategyNorm == "directsolve"
-        lto.ui.appendLog(app, "Initial guess strategy: Direct solve.", "INFO");
-        lto.ui.appendLog(app, "No external initial guess will be used.", "INFO");
+        lto.ui.appendLog(app, ...
+            "Initial guess strategy: Direct solve.", ...
+            "INFO");
+
+        lto.ui.appendLog(app, ...
+            "No external initial guess will be used.", ...
+            "INFO");
+
+        app.InitialGuess = [];
         return;
     end
 
-    if strategyNorm == "autostagedpipeline"
-        lto.ui.appendLog(app, ...
-            "Initial guess strategy: Auto staged pipeline.", ...
-            "INFO");
-
-        lto.ui.setStatus(app, "Running BF", "loading");
-        lto.ui.appendLog(app, "Backward-forward initial guess started.", "INFO");
-
-        bfTimer = tic;
-        initialGuess = lto.solver.runBackwardForwardSolver(solverTrack, cfg);
-        bfTime = toc(bfTimer);
-
-        app.InitialGuess = initialGuess;
-
-        lto.ui.appendLog(app, ...
-            "Backward-forward initial guess finished in " + string(bfTime) + " s.", ...
-            "INFO");
-
-        return;
-    end
-
-    % Handles both correct "Backward Forward" and current typo "Bacward Forward".
-    if strategyNorm == "backwardforward" || strategyNorm == "bacwardforward"
-        lto.ui.appendLog(app, ...
-            "Initial guess strategy: Backward Forward.", ...
-            "INFO");
-
-        lto.ui.setStatus(app, "Running BF", "loading");
-        lto.ui.appendLog(app, "Backward-forward initial guess started.", "INFO");
-
-        bfTimer = tic;
-        initialGuess = lto.solver.runBackwardForwardSolver(solverTrack, cfg);
-        bfTime = toc(bfTimer);
-
-        app.InitialGuess = initialGuess;
-
-        lto.ui.appendLog(app, ...
-            "Backward-forward initial guess finished in " + string(bfTime) + " s.", ...
-            "INFO");
-
-        return;
-    end
+    % ============================================================
+    % From file
+    % ============================================================
 
     if strategyNorm == "fromfile"
         lto.ui.appendLog(app, ...
             "Initial guess strategy: From file.", ...
             "INFO");
 
-        lto.ui.appendLog(app, "Initial guess file loading started.", "INFO");
-
-        fileTimer = tic;
         initialGuess = loadInitialGuessFromPath(app);
-        fileTime = toc(fileTimer);
-
         app.InitialGuess = initialGuess;
+        return;
+    end
 
+    % ============================================================
+    % Backward Forward only
+    % ============================================================
+
+    if strategyNorm == "backwardforward" || strategyNorm == "bacwardforward"
         lto.ui.appendLog(app, ...
-            "Initial guess file loading finished in " + string(fileTime) + " s.", ...
+            "Initial guess strategy: Backward Forward.", ...
             "INFO");
 
+        initialGuess = runBackwardForwardForInitialGuess(app, cfg, solverTrack);
+        app.InitialGuess = initialGuess;
         return;
+    end
+
+    % ============================================================
+    % Auto staged pipeline
+    % ============================================================
+
+    if strategyNorm == "autostagedpipeline"
+
+        if backendNorm == "pointmass"
+            lto.ui.appendLog(app, ...
+                "Auto staged pipeline for Point mass: BF -> Point mass NLP.", ...
+                "INFO");
+
+            initialGuess = runBackwardForwardForInitialGuess(app, cfg, solverTrack);
+            app.InitialGuess = initialGuess;
+            return;
+        end
+
+        if backendNorm == "dynamicbicycle"
+            lto.ui.appendLog(app, ...
+                "Auto staged pipeline for Dynamic bicycle: BF -> Point mass NLP -> Dynamic bicycle NLP.", ...
+                "INFO");
+
+            bfGuess = runBackwardForwardForInitialGuess(app, cfg, solverTrack);
+
+            lto.ui.setStatus(app, "Running point mass seed", "loading");
+            lto.ui.appendLog(app, "Point mass seed solve started.", "INFO");
+            drawnow;
+
+            pmTimer = tic;
+
+            pointMassSeed = lto.solver.runPointMassSolver( ...
+                solverTrack, ...
+                cfg, ...
+                bfGuess ...
+            );
+
+            pmTime = toc(pmTimer);
+
+            lto.ui.appendLog(app, ...
+                "Point mass seed solve finished in " + string(pmTime) + ...
+                " s. Status: " + string(pointMassSeed.status) + ".", ...
+                "INFO");
+
+            initialGuess = pointMassSeed;
+            app.InitialGuess = pointMassSeed;
+            return;
+        end
+
+        error("LTO:Solve:AutoPipelineNotImplemented", ...
+              "Auto staged pipeline not implemented for backend: %s", backendToRun);
     end
 
     error("LTO:Solve:UnknownInitialGuessStrategy", ...
           "Unknown initial guess strategy: %s", strategy);
+end
+
+
+function solution = runSelectedBackendSolver(backendModel, solverTrack, cfg, initialGuess)
+%RUNSELECTEDBACKENDSOLVER Run selected backend solver.
+
+    backendNorm = normalizeText(backendModel);
+
+    if backendNorm == "pointmass"
+        solution = lto.solver.runPointMassSolver( ...
+            solverTrack, ...
+            cfg, ...
+            initialGuess ...
+        );
+        return;
+    end
+
+    if backendNorm == "dynamicbicycle"
+        solution = lto.solver.runDynamicBicycleSolver( ...
+            solverTrack, ...
+            cfg, ...
+            initialGuess ...
+        );
+        return;
+    end
+
+    error("LTO:Solve:BackendNotImplemented", ...
+          "Backend model not implemented yet: %s", string(backendModel));
+end
+
+
+function bfGuess = runBackwardForwardForInitialGuess(app, cfg, solverTrack)
+%RUNBACKWARDFORWARDFORINITIALGUESS Run BF and log timing.
+
+    lto.ui.setStatus(app, "Running BF", "loading");
+    lto.ui.appendLog(app, ...
+        "Backward-forward initial guess started.", ...
+        "INFO");
+
+    drawnow;
+
+    bfTimer = tic;
+
+    bfGuess = lto.solver.runBackwardForwardSolver(solverTrack, cfg);
+
+    bfTime = toc(bfTimer);
+
+    lto.ui.appendLog(app, ...
+        "Backward-forward initial guess finished in " + string(bfTime) + " s.", ...
+        "INFO");
 end
 
 
@@ -259,4 +327,15 @@ function updateSolveSummaryTable(app, solution, solveTime)
     catch
         lto.ui.appendLog(app, "Could not update results table.", "WARNING");
     end
+end
+
+
+function out = normalizeText(txt)
+%NORMALIZETEXT Normalize dropdown/config text for robust matching.
+
+    out = lower(string(txt));
+    out = strtrim(out);
+    out = erase(out, " ");
+    out = erase(out, "-");
+    out = erase(out, "_");
 end
