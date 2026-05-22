@@ -405,6 +405,8 @@ Main assumption:
 all load transfer is instantaneous / quasi-static
 ```
 
+The wheel rates `k_w,F` and `k_w,R` are defined per one wheel.
+
 Longitudinal load transfer:
 
 ```math
@@ -416,6 +418,52 @@ where:
 
 ```math
 L = l_f + l_r
+```
+
+Roll axis height at the CG longitudinal position:
+
+```math
+h_{\mathrm{RA}} =
+\frac{l_r}{L} h_{\mathrm{RC},F}
++
+\frac{l_f}{L} h_{\mathrm{RC},R}
+```
+
+Global lateral direct/geometric and elastic fractions:
+
+```math
+\eta_{\mathrm{lat,geo}} =
+\frac{h_{\mathrm{RA}}}{h_{\mathrm{CG}}}
+```
+
+```math
+\eta_{\mathrm{lat,elastic}} =
+1 -
+\eta_{\mathrm{lat,geo}}
+=
+\frac{h_{\mathrm{CG}}-h_{\mathrm{RA}}}{h_{\mathrm{CG}}}
+```
+
+Approximate front and rear lateral forces:
+
+```math
+F_{y,F} \approx \frac{l_r}{L} m a_y
+```
+
+```math
+F_{y,R} \approx \frac{l_f}{L} m a_y
+```
+
+Direct/geometric lateral load transfer:
+
+```math
+\Delta F_{z,\mathrm{lat,geo},F} =
+\frac{F_{y,F} h_{\mathrm{RC},F}}{t_f}
+```
+
+```math
+\Delta F_{z,\mathrm{lat,geo},R} =
+\frac{F_{y,R} h_{\mathrm{RC},R}}{t_r}
 ```
 
 Roll stiffness distribution:
@@ -435,7 +483,10 @@ K_{\mathrm{ARB},R}
 ```
 
 ```math
-K_\phi = K_{\phi,F}+K_{\phi,R}
+K_\phi =
+K_{\phi,F}
++
+K_{\phi,R}
 ```
 
 ```math
@@ -444,7 +495,43 @@ K_\phi = K_{\phi,F}+K_{\phi,R}
 {K_{\phi,F}+K_{\phi,R}}
 ```
 
-The wheel rates `k_w,F` and `k_w,R` are defined per one wheel.
+Elastic roll moment:
+
+```math
+M_{\phi,\mathrm{elastic}} =
+m a_y
+\left(
+h_{\mathrm{CG}} - h_{\mathrm{RA}}
+\right)
+```
+
+Elastic lateral load transfer:
+
+```math
+\Delta F_{z,\mathrm{lat,elastic},F} =
+\frac{\lambda_\phi M_{\phi,\mathrm{elastic}}}{t_f}
+```
+
+```math
+\Delta F_{z,\mathrm{lat,elastic},R} =
+\frac{(1-\lambda_\phi) M_{\phi,\mathrm{elastic}}}{t_r}
+```
+
+Total lateral load transfer:
+
+```math
+\Delta F_{z,\mathrm{lat},F} =
+\Delta F_{z,\mathrm{lat,geo},F}
++
+\Delta F_{z,\mathrm{lat,elastic},F}
+```
+
+```math
+\Delta F_{z,\mathrm{lat},R} =
+\Delta F_{z,\mathrm{lat,geo},R}
++
+\Delta F_{z,\mathrm{lat,elastic},R}
+```
 
 ---
 
@@ -533,6 +620,49 @@ Longitudinal elastic time constant:
 {2\pi \zeta_\theta f_\theta}
 ```
 
+Roll axis height at the CG longitudinal position:
+
+```math
+h_{\mathrm{RA}} =
+\frac{l_r}{L} h_{\mathrm{RC},F}
++
+\frac{l_f}{L} h_{\mathrm{RC},R}
+```
+
+Global lateral direct/geometric and elastic fractions:
+
+```math
+\eta_{\mathrm{lat,geo}} =
+\frac{h_{\mathrm{RA}}}{h_{\mathrm{CG}}}
+```
+
+```math
+\eta_{\mathrm{lat,elastic}} =
+\frac{h_{\mathrm{CG}}-h_{\mathrm{RA}}}{h_{\mathrm{CG}}}
+```
+
+Approximate front and rear lateral forces:
+
+```math
+F_{y,F} \approx \frac{l_r}{L} m a_y
+```
+
+```math
+F_{y,R} \approx \frac{l_f}{L} m a_y
+```
+
+Direct/geometric lateral load transfer:
+
+```math
+\Delta F_{z,\mathrm{lat,geo},F} =
+\frac{F_{y,F} h_{\mathrm{RC},F}}{t_f}
+```
+
+```math
+\Delta F_{z,\mathrm{lat,geo},R} =
+\frac{F_{y,R} h_{\mathrm{RC},R}}{t_r}
+```
+
 Roll stiffness:
 
 ```math
@@ -556,6 +686,80 @@ K_{\phi,F}
 K_{\phi,R}
 ```
 
+Front elastic roll moment distribution:
+
+```math
+\lambda_\phi =
+\frac{K_{\phi,F}}
+{K_{\phi,F}+K_{\phi,R}}
+```
+
+Elastic roll moment target:
+
+```math
+M_{\phi,\mathrm{elastic,target}} =
+m a_y
+\left(
+h_{\mathrm{CG}} - h_{\mathrm{RA}}
+\right)
+```
+
+Elastic lateral load transfer targets:
+
+```math
+\Delta F_{z,\mathrm{lat,elastic,target},F} =
+\frac{
+\lambda_\phi M_{\phi,\mathrm{elastic,target}}
+}
+{t_f}
+```
+
+```math
+\Delta F_{z,\mathrm{lat,elastic,target},R} =
+\frac{
+(1-\lambda_\phi) M_{\phi,\mathrm{elastic,target}}
+}
+{t_r}
+```
+
+Elastic lateral dynamics:
+
+```math
+\dot{\Delta F}_{z,\mathrm{lat,elastic},F} =
+\frac{
+\Delta F_{z,\mathrm{lat,elastic,target},F}
+-
+\Delta F_{z,\mathrm{lat,elastic},F}
+}
+{\tau_{\mathrm{lat}}}
+```
+
+```math
+\dot{\Delta F}_{z,\mathrm{lat,elastic},R} =
+\frac{
+\Delta F_{z,\mathrm{lat,elastic,target},R}
+-
+\Delta F_{z,\mathrm{lat,elastic},R}
+}
+{\tau_{\mathrm{lat}}}
+```
+
+Total lateral load transfer:
+
+```math
+\Delta F_{z,\mathrm{lat},F} =
+\Delta F_{z,\mathrm{lat,geo},F}
++
+\Delta F_{z,\mathrm{lat,elastic},F}
+```
+
+```math
+\Delta F_{z,\mathrm{lat},R} =
+\Delta F_{z,\mathrm{lat,geo},R}
++
+\Delta F_{z,\mathrm{lat,elastic},R}
+```
+
 Roll natural frequency:
 
 ```math
@@ -572,18 +776,6 @@ Lateral elastic time constant:
 \tau_{\mathrm{lat}} =
 \frac{1}
 {2\pi \zeta_\phi f_\phi}
-```
-
-Lateral elastic dynamics:
-
-```math
-\dot{\Delta F}_{z,\mathrm{lat,elastic}} =
-\frac{
-\Delta F_{z,\mathrm{lat,elastic,target}}
--
-\Delta F_{z,\mathrm{lat,elastic}}
-}
-{\tau_{\mathrm{lat}}}
 ```
 
 Future version may replace the first-order elastic transfer with second-order roll/pitch dynamics:
@@ -606,10 +798,25 @@ C_\theta \dot{\theta}
 K_\theta \theta
 =
 M_\theta
-
-
 ```
 
+with damping coefficients:
+
+```math
+C_\phi =
+2 \zeta_\phi
+\sqrt{
+I_\phi K_\phi
+}
+```
+
+```math
+C_\theta =
+2 \zeta_\theta
+\sqrt{
+I_\theta K_\theta
+}
+```
 ## 9. GUI overview
 
 Main panels:
