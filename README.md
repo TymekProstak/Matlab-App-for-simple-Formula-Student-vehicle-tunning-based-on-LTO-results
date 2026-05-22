@@ -402,70 +402,213 @@ Planned as a model with immediate load transfer.
 Main assumption:
 
 ```text
-all load transfer is instantaneous / quasi-static / geometric
+all load transfer is instantaneous / quasi-static
 ```
 
 Longitudinal load transfer:
 
 ```math
-\Delta F_{z,\mathrm{long}}=\frac{m a_x h_{\mathrm{CG}}}{L}
+\Delta F_{z,\mathrm{long}} =
+\frac{m a_x h_{\mathrm{CG}}}{L}
+```
+
+where:
+
+```math
+L = l_f + l_r
 ```
 
 Roll stiffness distribution:
 
 ```math
-K_{\phi,F}=\frac{k_{w,F}t_f^2}{2}+K_{\mathrm{ARB},F}
+K_{\phi,F} =
+\frac{k_{w,F} t_f^2}{2}
++
+K_{\mathrm{ARB},F}
 ```
 
 ```math
-K_{\phi,R}=\frac{k_{w,R}t_r^2}{2}+K_{\mathrm{ARB},R}
+K_{\phi,R} =
+\frac{k_{w,R} t_r^2}{2}
++
+K_{\mathrm{ARB},R}
 ```
 
 ```math
-\lambda_\phi=\frac{K_{\phi,F}}{K_{\phi,F}+K_{\phi,R}}
+K_\phi = K_{\phi,F}+K_{\phi,R}
 ```
+
+```math
+\lambda_\phi =
+\frac{K_{\phi,F}}
+{K_{\phi,F}+K_{\phi,R}}
+```
+
+The wheel rates `k_w,F` and `k_w,R` are defined per one wheel.
+
+---
 
 ### 8.2 Dynamic suspension model
 
-Planned as the most advanced model.
+Planned as the most advanced simplified suspension model.
 
 Main assumption:
 
 ```text
-total load transfer = geometric/direct part + elastic delayed part
+total load transfer = direct/geometric part + elastic delayed part
 ```
 
-The geometric part acts immediately.
+The direct/geometric part acts immediately.  
+The elastic part is delayed with first-order dynamics.
 
-The elastic part is delayed with first-order dynamics:
+Longitudinal total load transfer:
 
 ```math
-\dot{\Delta F}_{z,\mathrm{elastic}}=\frac{\Delta F_{z,\mathrm{elastic,target}}-\Delta F_{z,\mathrm{elastic}}}{\tau}
+\Delta F_{z,\mathrm{long,total}} =
+\frac{m a_x h_{\mathrm{CG}}}{L}
 ```
 
-Natural frequency from wheel rate and sprung mass:
+Anti-squat / anti-dive direct fraction:
 
 ```math
-f_n=\frac{1}{2\pi}\sqrt{\frac{k_w}{m_s}}
+\eta_{\mathrm{long}} =
+\begin{cases}
+AS, & a_x > 0 \quad \mathrm{drive/acceleration} \\
+AD, & a_x < 0 \quad \mathrm{braking}
+\end{cases}
 ```
 
-First-order time constant from frequency and damping ratio:
+Direct longitudinal part:
 
 ```math
-\tau=\frac{1}{2\pi\zeta f_n}
+\Delta F_{z,\mathrm{long,direct}} =
+\eta_{\mathrm{long}}
+\Delta F_{z,\mathrm{long,total}}
 ```
 
-Future version may replace this first-order elastic transfer with second-order roll/pitch dynamics:
+Elastic longitudinal target:
 
 ```math
-I_\phi\ddot{\phi}+C_\phi\dot{\phi}+K_\phi\phi=M_\phi
+\Delta F_{z,\mathrm{long,elastic,target}} =
+(1-\eta_{\mathrm{long}})
+\Delta F_{z,\mathrm{long,total}}
+```
+
+Elastic longitudinal dynamics:
+
+```math
+\dot{\Delta F}_{z,\mathrm{long,elastic}} =
+\frac{
+\Delta F_{z,\mathrm{long,elastic,target}}
+-
+\Delta F_{z,\mathrm{long,elastic}}
+}
+{\tau_{\mathrm{long}}}
+```
+
+Pitch stiffness:
+
+```math
+K_\theta =
+2 k_{w,F} l_f^2
++
+2 k_{w,R} l_r^2
+```
+
+Pitch natural frequency:
+
+```math
+f_\theta =
+\frac{1}{2\pi}
+\sqrt{
+\frac{K_\theta}{I_\theta}
+}
+```
+
+Longitudinal elastic time constant:
+
+```math
+\tau_{\mathrm{long}} =
+\frac{1}
+{2\pi \zeta_\theta f_\theta}
+```
+
+Roll stiffness:
+
+```math
+K_{\phi,F} =
+\frac{k_{w,F} t_f^2}{2}
++
+K_{\mathrm{ARB},F}
 ```
 
 ```math
-I_\theta\ddot{\theta}+C_\theta\dot{\theta}+K_\theta\theta=M_\theta
+K_{\phi,R} =
+\frac{k_{w,R} t_r^2}{2}
++
+K_{\mathrm{ARB},R}
 ```
 
----
+```math
+K_\phi =
+K_{\phi,F}
++
+K_{\phi,R}
+```
+
+Roll natural frequency:
+
+```math
+f_\phi =
+\frac{1}{2\pi}
+\sqrt{
+\frac{K_\phi}{I_\phi}
+}
+```
+
+Lateral elastic time constant:
+
+```math
+\tau_{\mathrm{lat}} =
+\frac{1}
+{2\pi \zeta_\phi f_\phi}
+```
+
+Lateral elastic dynamics:
+
+```math
+\dot{\Delta F}_{z,\mathrm{lat,elastic}} =
+\frac{
+\Delta F_{z,\mathrm{lat,elastic,target}}
+-
+\Delta F_{z,\mathrm{lat,elastic}}
+}
+{\tau_{\mathrm{lat}}}
+```
+
+Future version may replace the first-order elastic transfer with second-order roll/pitch dynamics:
+
+```math
+I_\phi \ddot{\phi}
++
+C_\phi \dot{\phi}
++
+K_\phi \phi
+=
+M_\phi
+```
+
+```math
+I_\theta \ddot{\theta}
++
+C_\theta \dot{\theta}
++
+K_\theta \theta
+=
+M_\theta
+```
+
+```
 
 ## 9. GUI overview
 
