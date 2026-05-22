@@ -798,7 +798,7 @@ C_\theta \dot{\theta}
 K_\theta \theta
 =
 M_\theta
-```
+
 
 ```
 ## 9. GUI overview
