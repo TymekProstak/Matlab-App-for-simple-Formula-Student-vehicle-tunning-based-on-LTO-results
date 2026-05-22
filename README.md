@@ -800,22 +800,6 @@ K_\theta \theta
 M_\theta
 ```
 
-with damping coefficients:
-
-```math
-C_\phi =
-2 \zeta_\phi
-\sqrt{
-I_\phi K_\phi
-}
-```
-
-```math
-C_\theta =
-2 \zeta_\theta
-\sqrt{
-I_\theta K_\theta
-}
 ```
 ## 9. GUI overview
 
