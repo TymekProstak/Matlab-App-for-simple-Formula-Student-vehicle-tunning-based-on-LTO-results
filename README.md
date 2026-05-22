@@ -444,16 +444,6 @@ Global lateral direct/geometric and elastic fractions:
 \frac{h_{\mathrm{CG}}-h_{\mathrm{RA}}}{h_{\mathrm{CG}}}
 ```
 
-Approximate front and rear lateral forces:
-
-```math
-F_{y,F} \approx \frac{l_r}{L} m a_y
-```
-
-```math
-F_{y,R} \approx \frac{l_f}{L} m a_y
-```
-
 Direct/geometric lateral load transfer:
 
 ```math
