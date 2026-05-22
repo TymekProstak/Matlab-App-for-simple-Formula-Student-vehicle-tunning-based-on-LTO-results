@@ -847,6 +847,7 @@ Planned future extensions:
 - improve solver diagnostics and sanity checks.
 - add camber related effects
 - add tire relaxation effects
+- add heave related effects
 
 ---
 
